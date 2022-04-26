@@ -987,7 +987,7 @@ class Evolver {
             if (this.t1 == null) {
                 this.t += this.dt;
                 this.iterator += 1;
-                if (!(this.total_iterations == null) && this.iterator > this.total_iterations) {
+                if (!(this.total_iterations == null) && this.iterator >= this.total_iterations) {
                     this.evolving = false;
                 }
             }
@@ -995,7 +995,7 @@ class Evolver {
                 this.t += this.dt;
                 this.t = (this.t0<this.t1)?(this.t>=this.t1?this.t1:this.t):(this.t<=this.t1?this.t1:this.t);
                 this.iterator += 1;
-                if ( this.iterator > this.total_iterations) {
+                if ( this.iterator >= this.total_iterations) {
                     this.evolving = false;
                 }
             }
