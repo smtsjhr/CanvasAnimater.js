@@ -41,6 +41,9 @@
      * 
      * @property {number} scrollX1  horizontal x-component of scroll range in unit normalized range
      * @property {number} scrollY1 vertical y-component of scroll range in unit normalized range
+     * * @property {boolean} pressedMouse true when mouse is pressed down
+     * * @property {bollean} pressedTouch true when touch is pressed down
+     * * @property {boolean} pressed true when mouse or touch is pressed down
      */
 
 /** Recording settings
@@ -300,6 +303,18 @@ class CanvasAnimater {
         return this.animater.interacter.scroll_norm_y;
     }
 
+    get pressedMouse() {
+        return this.animater.interacter.mouse_pressed;
+    }
+
+    get pressedTouch() {
+        return this.animater.interacter.touch_pressed;
+    }
+
+    get pressed() {
+        return this.animater.interacter.mouse_pressed || this.animater.interacter.touch_pressed;
+    }
+
     /** Configures animation settings with an object containing any number of defined CanvasAnimater settings.
      * @param {object} settings_object object with key/value pairs of CanvasAnimater settings
      */
@@ -357,10 +372,11 @@ class CanvasAnimater {
     }
 
     /** Specifies which interaction modes are enabled for the canvas. 
-     * @param {(string|string[])} interaction_modes_array input parameter must be a single string, or an array of valid interaction modes: 'mousedownmove', 'mousehovermove', 'touchmove', 'scroll'. 
+     * @param {(string|string[])} interaction_modes input parameter must be a single string, or an array of valid interaction modes: 'mousedownmove', 'mousehovermove', 'touchmove', 'scroll'. 
+     * @param {bollean} interaction_enabled enables interaction on the canvas if true
      */
-    interactionModes(interaction_modes_array) {
-        this.setAnimater({interaction_enabled : true, interaction_modes : interaction_modes_array});
+    interact(interaction_modes, interaction_enabled = true) {
+        this.setAnimater({interaction_enabled : interaction_enabled, interaction_modes : interaction_modes});
     }
 
     /** Sets the relative coordinates for the origin point for which various interaction parameters are defined.
