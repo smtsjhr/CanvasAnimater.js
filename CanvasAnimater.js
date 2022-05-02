@@ -41,9 +41,9 @@
      * 
      * @property {number} scrollX1  horizontal x-component of scroll range in unit normalized range
      * @property {number} scrollY1 vertical y-component of scroll range in unit normalized range
-     * * @property {boolean} pressedMouse true when mouse is pressed down
-     * * @property {bollean} pressedTouch true when touch is pressed down
-     * * @property {boolean} pressed true when mouse or touch is pressed down
+     * @property {boolean} pressedMouse true when mouse is pressed down
+     * @property {boolean} pressedTouch true when touch is pressed down
+     * @property {boolean} pressed true when mouse or touch is pressed down
      */
 
 /** Recording settings
@@ -1041,8 +1041,8 @@ class Interacter {
         this.norm_y = 0;
         this.canvas_x = 0;
         this.canvas_y = 0;
-        this.scrollX = 0;
-        this.scrollY = 0;
+        this.scroll_x = 0;
+        this.scroll_Y = 0;
         this.scroll_norm_x = 0;
         this.scroll_norm_y = 0;
         this.flex_canvas = false;
@@ -1084,10 +1084,10 @@ class Interacter {
     }
 
     scroll_action() {
-        this.scrollX = window.scrollX;
-        this.scrollY = window.scrollY;
-        this.scroll_norm_x = this.scrollX/(this.wrapper_width - this.canvas.width - this.canvas_margin);
-        this.scroll_norm_y = this.scrollY/(this.wrapper_height - this.canvas.height - this.canvas_margin);
+        this.scroll_x = window.scrollX;
+        this.scroll_y = window.scrollY;
+        this.scroll_norm_x = this.scroll_x/(this.wrapper_width - this.canvas.width - this.canvas_margin);
+        this.scroll_norm_y = this.scroll_y/(this.wrapper_height - this.canvas.height - this.canvas_margin);
         this.interaction();
     }
 
@@ -1150,7 +1150,7 @@ class Interacter {
             })
         }
 
-        if (this.modes.includes("scroll")) {
+        if (this.modes.includes('scroll')) {
             window.addEventListener('scroll', e => {this.scroll_action()});
         }
     }
