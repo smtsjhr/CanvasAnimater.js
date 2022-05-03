@@ -1116,6 +1116,7 @@ class Interacter {
                 
                 this.canvas.addEventListener('mouseup', e => {
                     this.mouse_pressed = false;
+                    this.mouse_action(this.canvas, e);
                 });
             }
         
