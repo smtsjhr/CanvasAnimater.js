@@ -358,17 +358,12 @@ class CanvasAnimater {
     }
 
     /** Creates a namespace to interpret code conventions using short function definitions from Dwitter.com. 
+     * @param {boolean} dwitter_mode enables Dwitter mode if true
+     * @param {boolean} dwitter_scale rescales the canvas to user specified dimensions by transforming the canvas context.
      * @param {boolean} dwitter_res sets the canvas dimensions to 1920x1080 as used on Dwitter if true
      */
-    dwitterMode(dwitter_res = true) {
-        this.setAnimater({dwitter_mode : true, dwitter_res : dwitter_res});
-    }
-    
-    /** Rescales the canvas to user specified dimensions by transforming the canvas context. 
-     * 
-     */
-    dwitterScale() {
-        this.setAnimater({dwitter_scale : true,dwitter_res : false});
+    dwitterMode(dwitter_mode = true, dwitter_scale = false, dwitter_res = false) {
+        this.setAnimater({dwitter_mode : dwitter_mode, dwitter_scale : dwitter_scale, dwitter_res : dwitter_res});
     }
 
     /** Specifies which interaction modes are enabled for the canvas. 
@@ -451,12 +446,13 @@ class CanvasAnimater {
 
     /** Enables recording of the canvas by saving individual frames of the animation.
      * 
+     * @param {boolean} record_enabled enables recording if true
      * @param {string} filename name prefix given to recorded frames, where each frame's name is indexed as 'filename_{frame_number}'
      * @param {number} record_loops number of animation loops to record
      * @param {boolean} pre_loop allows one full animation loop to complete before recording starts if true
      */
-    record(filename = 'frame_', record_loops = 1, pre_loop = false) {
-        this.setAnimater({record_enabled: true, filename : filename, record_loops : record_loops, pre_loop : pre_loop});
+    record(record_enabled = true, filename = 'frame_', record_loops = 1, pre_loop = false) {
+        this.setAnimater({record_enabled: record_enabled, filename : filename, record_loops : record_loops, pre_loop : pre_loop});
     }
 
     /** Sets a maximum limit to the number of frames to record.
@@ -485,8 +481,8 @@ class Animater {
         this.draw = function() {};
 
         // canvas settings
-        this.width;
-        this.height;
+        //this.width;
+        //this.height;
         this.flex_canvas = false;
         this.center_canvas = false;
         this.canvas_margin = "-8px";
@@ -546,6 +542,22 @@ class Animater {
 
     get context() {
         return this.canvas.context;
+    }
+
+    get width() {
+        return this.canvas.width;
+    }
+
+    set width(width) {
+        this.canvas.width = width;
+    }
+
+    get height() {
+        return this.canvas.height;
+    }
+
+    set height(height) {
+        this.canvas.height = height;
     }
 
     setAnimater(settings_object) {
@@ -646,11 +658,12 @@ class Animater {
         window.S = Math.sin;
         window.C = Math.cos;
         window.T = Math.tan;
-        window.R =(r,g,b,a)=>{return `rgba(${r},${g},${b},${a})`};
-        this.draw = this.convertDwitterDraw();
+        window.R =(r,g,b,a=1)=>{return `rgba(${r},${g},${b},${a})`};
+        
         if (this.dwitter_res == true) {
-            this.setDwitterRes();
+            this.setDwitterRes(1920, 1080);
         }
+        this.draw = this.convertDwitterDraw();
     }
 
     convertDwitterDraw() {
@@ -662,7 +675,7 @@ class Animater {
             code_string = this.draw.toString()
             code_string = code_string.substring(code_string.indexOf("{")+1, code_string.length-1);
         }
-        if (!(this.dwitter_res) && this.dwitter_scale) {
+        if (this.dwitter_scale) {
            code_string = "c.width|=0;x.scale(c.width/1920,c.width/1920);"+code_string; 
         }
         return new Function('t', code_string);
@@ -912,14 +925,30 @@ class Canvas {
         this.id = canvas_id;
         this.element = document.getElementById(this.id);
         this.context = this.element.getContext('2d');
-        this.width = this.element.width;
-        this.height = this.element.height;
+        //this.width = this.element.width;
+        //this.height = this.element.height;
         this.style;
         this.wrapper; 
         this.wrapper_width;
         this.wrapper_height;
         this.flex_canvas;
         this.center_canvas;
+    }
+
+    get width() {
+        return this.element.width;
+    }
+
+    set width(width) {
+        this.element.width = width;
+    }
+
+    get height() {
+        return this.element.height;
+    }
+
+    set height(height) {
+        this.element.height = height;
     }
 
     resize(width, height) {
