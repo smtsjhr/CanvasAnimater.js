@@ -225,7 +225,7 @@ class CanvasAnimater {
         this.setAnimater({dwitter_scale : dwitter_scale});
     }
 
-    set dwitterCode(code_string) {
+    set dwitter_code(code_string) {
         this.animater.dwitterCode_string = code_string;
         this.animater.dwitterCode_set = true;
         this.setAnimater({dwitter_mode : true});
