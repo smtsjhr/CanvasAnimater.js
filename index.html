@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CanvasAnimater</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+<section>
+
+    <h1 class="page-title">CanvasAnimater.js</h1>
+
+
+
+    <div class="class-description">
+
+    <p>
+        CanvasAnimater.js is a utility script for animating, recording, and interacting with graphics using the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/canvas">HTML5 &#60;canvas&#62;</a>. It is light weight, uses vanilla javascript, and has no dependencies.
+    </p> 
+
+    <p>
+        At its core CanvasAnimater.js provides controlled frame-throttling to render an animation at a user specified frame rate, but its essence offers a way parametrize dynamic animations by exposing a relative time evolution variable.
+    </p>
+ 
+    <p>
+        Although this tool was developed for recreational creative coding purposes, its main functionality lends itself to any situation where rapid prototyping of Canvas animations is desired. Unlike other popular frameworks that achieve something similar, like <a href="https://p5js.org/">p5.js</a>, CanvasAnimater.js does not offer special drawing context primitives for rendering graphics beyond the native <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">Canvas API</a>. Seemingly more cumbersome, working directly with the Canvas API allows deeper control for generating graphics, and in this way CanvasAnimater.js gives us the best of both. 
+    </p>
+
+    <p>
+        CanvasAnimater.js provides an intuitive interface with declarative style control of settings and the option of more refined functionality. Check out the interactive <a href="#Guide">guide</a> below for basic usage and consult the <a href="./CanvasAnimater.html">API reference </a> for details on all available <a href='./CanvasAnimater.html#SettingsSection'>settings</a> and <a href="./CanvasAnimater.html#MethodsSection">methods</a>.
+    </p>
+
+    <hr>
+
+    <p>
+        <strong>CanvasAnimater.js is still under active development and changes to the underlying source, API, and documentation are possible.</strong>
+    </p>
+
+    <p>
+        Future developments include:
+        <ul>
+            <li>key commands for starting/stopping animation and recording </li>
+            <li>easing functions for time evolution</li>
+            <li>more interaction modes and properties</li>
+            <li>various file formats for recorded output</li>
+            
+        </ul>
+    </p>
+    <hr>
+
+    </div>
+
+    <hr>
+
+
+
+
+    <h1 id="Guide">Guide</h1>
+
+    <ul>
+        <li><a href="#Initialization">Initialization</a></li>
+        <ul>
+            <li><a href="#Settings">Settings</a></li>  
+        </ul>
+        <li><a href="#CanvasSettings">Canvas Settings</a></li>
+        <ul>
+            <li><a href="#Sizing">Sizing</a></li>
+            <li><a href="#Centering">Centering</a></li>
+            <li><a href="#Flexing">Flexing</a></li>
+        </ul>
+        <li><a href="#Animating">Animating</a></li>
+        <ul>
+            <li><a href="#FrameThrottling">Frame Throttling</a></li>
+            <li><a href="#Evolving">Evolving</a></li>
+            <li><a href="#Looping">Looping</a></li>
+            <li><a href="#Modes">Modes</a></li>
+            <ul>
+                <li><a href="#rate">'rate'</a></li>
+                <li><a href="#frames">'frames'</a></li>
+                <li><a href="#time">'time'</a></li>
+            </ul>
+        </ul>
+        <li><a href="#Interacting">Interacting</a></li>
+        <ul>
+            <li><a href="#mousedownmove">'mousedownmove'</a></li>
+            <li><a href="#mousehovermove">'mousehovermove'</a></li>
+            <li><a href="#touchmove">'touchmove'</a></li>
+            <li><a href="#scroll">'scroll'</a></li>
+        </ul>
+        <li><a href="#DwitterMode">Dwitter Mode</a></li>
+        <li><a href="#Recording">Recording</a></li>
+    </ul>
+
+<hr>
+<br>
+
+    <h2 id="Initialization">Initialization</h2>
+
+    <p>
+        Lets begin our explorations of <span class="code">CanvasAnimater</span> by describing a basic setup for initializing and displaying a canvas graphic. In this section, we will construct the foundations of a basic template that we will build upon throughout this guide.
+    </p>
+
+    <p>
+        We start by creating a new instance to the <span class="code">CanvasAnimater</span>  class using the constructor function <a href="./CanvasAnimater.html#CanvasAnimater"><span class="code" >CanvasAnimater(canvas_id)</span></a>. Throughout this guide we will call our instantiated <span class="code">CanvasAnimater</span> object <span class="code">canvasAnimater</span> using the "camelCase" convention.
+    </p>
+
+    <p>
+        This constructor method takes as input the parameter <span class="code">canvas_id</span> corresponding to the HTML <span class="code">id</span> attribute of a &#60;canvas&#62; element, and sets it as the target for <span class="code">CanvasAnimater</span>. We can target an existing &#60;canvas&#62; element in the DOM by using its attribute <span class="code">id</span>, for example <span class="code">id = 'myCanvas'</span> as done in the example below. Otherwise, a new &#60;canvas&#62; element is created and added to the DOM with <span class="code">id = 'canvas_id'</span>.
+    </p>
+
+    <pre><p class="source code">
+let canvasAnimater = new CanvasAnimater('myCanvas');
+    </p></pre>
+
+    
+    
+    <p>Once we have created a new <span class="code">CanvasAnimater</span> object, we can start setting up the animation. First, we get the <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D">'2D' rendering context</a> of the canvas for drawing onto the canvas. This is readily accessed with the <a href="./CanvasAnimater.html#Canvas"><span class="code" >context</span></a> property of a <span class="code">CanvasAnimater</span> object. </p>
+
+    <pre><p class="source code">
+let ctx = canvasAnimater.context;
+    </p></pre>
+    
+
+    <p>
+    Now we define and set a function where we specify what to draw onto the canvas. This function must be set to the <a href="./CanvasAnimater.html#Canvas"><span class="code" >draw</span></a> property of our <span class="code" >CanvasAnimater</span> object. By referencing our <span class="code" >context</span> property in this draw function, we can make use of any methods available from the <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D">native interface</a>. To keep it simple for now, lets just draw a black 100x100 rectangle onto the canvas as follows:
+
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function () {
+
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, 100, 100);  
+}
+
+</p></pre>
+
+    <p>
+    Our last step to render and display our canvas requires calling the <a href="./CanvasAnimater.html#animate"><span class="code" >animate()</span></a> method. This method should be called at the end of our script after any other configurations to <span class="code" >CanvasAnimater</span> are made. Note that this method takes an optional parameter <a href="./CanvasAnimater.html#animate"><span class="code" >settings_object</span></a> to configure additional settings, but we will ignore that for now until the next section.
+    </p>
+
+
+    <pre><p class="source code">
+canvasAnimater.animate();
+    </p></pre>
+
+    <p>
+        Check out the interactive CodePen below where we put all this together to display a static black square. There is nothing animating here yet, but this template offers a bit of boilerplate code to get set up with CanvasAnimater.
+    </p>
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_1.0" src="https://codepen.io/smtsjhr/embed/preview/mdpgLbB/e5c98758d1c08312956f26721b7d7f2a?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/mdpgLbB/e5c98758d1c08312956f26721b7d7f2a">
+        CanvasAnimater.js_Guide_1.0</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    <hr>
+    <br>
+
+
+
+    <h3 id="Settings">Settings</h3>
+
+    <p>
+        <span class="code" >CanvasAnimater</span> offers a few different ways to configure all of its settings. A complete list of settings can be found in the <a href="./CanvasAnimater.html#SettingsSection">API reference </a> together with their description and defaults. These settings are exposed as named properties of the <span class="code" >CanvasAnimater</span> class, which can be used as a declarative style interface to setup our animation. Alternatively, <span class="code" >CanvasAnimater</span> also provides various <a href="./CanvasAnimater.html#MethodsSection">methods</a> to configure animation settings. Both of these paradigms can be used throughout a <span class="code" >CanvasAnimater</span> sketch as we please. The rest of this guide will serve to give further details on all available settings and methods.
+    </p>
+
+    <p>
+        One way to configure animation settings is by using the <a href="./CanvasAnimater.html#setAnimater"><span class="code" >setAnimater(settings_object)</span></a> method. Here, the input <a href="./CanvasAnimater.html#setAnimater"><span class="code" >settings_object</span></a> is an object of key-value pairs corresponding to <span class="code">CanvasAnimater</span> <a href="./CanvasAnimater.html#SettingsSection">settings</a>. This method can be called throughout our script multiple times with different input settings without overwriting unspecified properties. 
+    </p>
+
+    <p>
+        As mentioned in the previous section, we can also specify our desired <span class="code">CanvasAnimater</span> settings with a <a href="./CanvasAnimater.html#animate"><span class="code" >settings_object</span></a> as an optional parameter to the main <a href="./CanvasAnimater.html#animate"><span class="code" >animate(settings_object)</span></a> method. 
+    </p>
+
+    <p>
+        For example, the following <span class="code" >settings_object</span> can be used to configure <span class="code">CanvasAnimater</span> to render a variant of a sketch we will develop <a href=#time>later in this guide</a>. 
+    </p>
+
+    <pre><p class="source code">
+settings_object = {
+    width: 300,
+    height: 300, 
+    center_canvas: true,
+    fps: 24,
+    loop_animation: true,
+    t_start: 0,
+    t_end: 2*Math.PI,
+    animation_mode: "time",
+    animation_time: 60, 
+}
+    </p></pre>
+
+    <p>
+        The following sketch uses these settings to draw a white disk that moves around in a circle like the second hand of a clock. Note that at the end of our script we call the <a href="./CanvasAnimater.html#printSettings"><span class="code">printSettings()</span></a> method, which serves as a utility function that prints all configured <span class="code">CanvasAnimater</span> settings to the console. 
+    </p>
+        
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_1.1" src="https://codepen.io/smtsjhr/embed/preview/MWQeEVe/8317aba36e3b11562c114a9e19a5907e?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/MWQeEVe/8317aba36e3b11562c114a9e19a5907e">
+        CanvasAnimater.js_Guide_1.1</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+
+    <hr>
+    <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <h2 id="CanvasSettings">Canvas Settings</h2>
+
+      <p>
+        This section will describe canvas settings for <a href="#Sizing">sizing</a>, <a href="#Centering">centering</a>, and <a href="#Flexing">flexing</a> the canvas. To demonstrate, we will continue to build on the basic sketch template we set up in the previous section.
+      </p>
+
+
+      <h3 id="Sizing">Sizing</h3>
+      <p>
+        We can set the size of the canvas using the <a href="./CanvasAnimater.html#size"><span class="code" >size(width, height)</span></a> method, which takes input parameters <a href="./CanvasAnimater.html#Canvas"><span class="code" >width</span></a> and <a href="./CanvasAnimater.html#Canvas"><span class="code" >height</span></a> corresponding to the horizontal and vertical dimensions in pixels. Here, we set the canvas size to a square 300x300 pixels:
+    </p>
+    
+    
+    <pre><p class="source code">
+canvasAnimater.size(300,300);
+    </p></pre>
+    
+    <p>
+        The <a href="./CanvasAnimater.html#Canvas"><span class="code" >width</span></a> and <a href="./CanvasAnimater.html#Canvas"><span class="code" >height</span></a> properties of a <span class="code" >CanvasAnimater</span> object can be used as variables in your sketch. For example, lets use them in our <a href="./CanvasAnimater.html#Canvas"><span class="code" >draw</span></a> function from the last section to make the black rectangle fill the entire canvas as follows:
+
+    </p>
+  
+    <pre><p class="source code">
+canvasAnimater.draw = function () {
+
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H);  
+}
+
+</p></pre>
+
+
+    <p>
+        Our draw function essentially just draws a static black background to the canvas. We still have not animated anything yet, but you can view this in action below and try changing the parameters of <a href="./CanvasAnimater.html#size"><span class="code" >size(width, height)</span></a> to see how the rendered canvas will update.
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="Untitled" src="https://codepen.io/smtsjhr/embed/preview/rNpbvNB/cfe06eaa52744909fc0225e7ae26962c?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/rNpbvNB/cfe06eaa52744909fc0225e7ae26962c">
+        Untitled</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    <hr>
+    <br>
+      
+    <h3 id="Centering">Centering</h3>
+
+    <p>
+        By default, the canvas is placed in the top-left corner of the window. We can easily center the canvas in the window using the <a href="./CanvasAnimater.html#center"><span class="code" >center(center_canvas)</span></a> method, which has an optional boolean parameter <a href="./CanvasAnimater.html#center"><span class="code" >center_canvas</span></a> where the canvas is centered if true.
+    </p> 
+
+    <pre><p class="source code">
+canvasAnimater.center();
+    </p></pre>
+        
+        
+    <p>
+        Alternatively, the canvas can be centered by setting the <a href="./CanvasAnimater.html#Canvas"><span class="code" >center_canvas</span></a> property to true:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.center_canvas = true;
+    </p></pre>
+
+  <p>
+      Below, we center the canvas using the <a href="./CanvasAnimater.html#center"><span class="code" >center()</span></a> method. Consider changing the size of the canvas and observe how the canvas remains conveniently centered.
+  </p>
+
+
+  <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_1.2" src="https://codepen.io/smtsjhr/embed/preview/RwxOywZ/a115f0caf50932049392939d8780662d?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href="https://codepen.io/smtsjhr/pen/RwxOywZ/a115f0caf50932049392939d8780662d">
+    CanvasAnimater.js_Guide_1.2</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+    on <a href="https://codepen.io">CodePen</a>.
+  </iframe>
+
+  <hr>
+  <br>
+
+  <h3 id="Flexing">Flexing</h3>
+
+  <p>
+      The <a href="./CanvasAnimater.html#center"><span class="code" >flex(flex_canvas)</span></a> method scales the canvas to the full window dimensions, and automatically rescales whenever the window dimensions are changed. Here, <a href="./CanvasAnimater.html#Canvas"><span class="code" >flex_canvas</span></a> is an optional boolean parameter which defaults to <span class="code" >true</span>.
+  </p>
+
+   <pre><p class="source code">
+canvasAnimater.flex();
+    </p></pre>
+        
+    <p>
+        Likewise, the canvas can be flexed by setting the <a href="./CanvasAnimater.html#Canvas"><span class="code" >flex_canvas</span></a> property to true:
+    </p>
+    
+    <pre><p class="source code">
+canvasAnimater.flex_canvas = true;
+    </p></pre>
+    
+        <p>
+            If we use the canvas <span class="code" >width</span> and <span class="code" >height</span> properties in our <span class="code" >draw</span> function as we did in our previous examples, we can render appropriately scaled graphics at any aspect ratio. In the CodePen below, try changing the size of the window and observe how the black rectangle's dimensions update to basically serve as a background.
+         </p>
+
+
+
+         <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_1.3" src="https://codepen.io/smtsjhr/embed/preview/oNpOdbB/db450f71763a23dc47cbe53a7218a266?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+            See the Pen <a href="https://codepen.io/smtsjhr/pen/oNpOdbB/db450f71763a23dc47cbe53a7218a266">
+            CanvasAnimater.js_Guide_1.3</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+            on <a href="https://codepen.io">CodePen</a>.
+        </iframe>
+
+  <hr>
+  <br>
+
+
+  <h2 id="Animating">Animating</h2>
+
+<p>
+  In this section we will describe the essential animating functionality of <span class="code">CanvasAnimater</span>. This  includes frame throttling to render our animation at a fixed frames-per-second, and various modes allowing us to control parametrized time evolution of our animation. In the API reference, you can find all relevant <a href="./CanvasAnimater.html#Animation">animation settings</a> and methods like <a href="./CanvasAnimater.html#FPS"><span class="code"> FPS()</span></a>, <a href="./CanvasAnimater.html#mode"><span class="code" >mode()</span></a>, <a href="./CanvasAnimater.html#evolve"><span class="code" >evolve()</span></a>, <a href="./CanvasAnimater.html#loop"><span class="code" >loop()</span></a>
+</p>
+
+<p>
+    Lets begin our exploration with the basic sketch we set up in the previous section, where we simply drew a static black background. To illustrate all the animating functionality, we will now try to animate a white disk that moves around the canvas. First we will present a more traditional method for animating graphics. We can than contrast this and appreciate the utility offered by <span class="code">CanvasAnimater</span>.
+</p>
+
+<p>
+    The draw function below adds a white disk that is meant to move in a circular path around the center of the canvas. Here we defined the parameters for the disk in terms of the canvas <a href="./CanvasAnimater.html#Sizing"><span class="code" >width</span></a> and <a href="./CanvasAnimater.html#Sizing"><span class="code" >height</span></a> properties in order to present a scale invariant graphic, which we utilize by using the <a href="./CanvasAnimater.html#flex"><span class="code" >flex()</span></a> canvas setting. Moreover, we declare global <span class="code">time</span> and <span class="code">rate</span> variables to parameterize the circular motion where <span class="code">time</span> is incremented by <span class="code">rate = 0.01</span> at the end of our <span code="code">draw</span> function. 
+</p>
+
+    <pre><p class="source code">
+let time = 0;
+let rate = 0.01;
+
+canvasAnimater.draw = function () {
+
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H); 
+    
+    // define a radius for the circular path the disk follows
+    let R = Math.min(W,H)/4;
+    
+    // draw a white disk that moves in a circle  
+    ctx.beginPath();
+    ctx.arc(W/2 + R*Math.sin(time), H/2 - R*Math.cos(time), R/4, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+    time += rate;
+}
+    </p></pre>
+
+<p>
+    <span class="code">CanvasAnimater</span> implements animation by repeatedly calling the <span class="code">draw</span> function to render consecutive frames. Previously in our demo, the <span class="code">draw</span> function was not designed to display any motion since it effectively drew the same plain black background for each frame. Now you can see this new <span class="code">draw</span> function in action below where a disk moves around. Note that our previous boiler plate template for our (non-animated) sketch directly translates over here to yield an animated graphic. 
+</p>
+
+
+<iframe height="500" style="width: 100%;" scrolling="no" title="Untitled" src="https://codepen.io/smtsjhr/embed/preview/bGayGyv/7181bab595cec26e6e72ac0f094370f8?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href="https://codepen.io/smtsjhr/pen/bGayGyv/7181bab595cec26e6e72ac0f094370f8">
+    Untitled</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+    on <a href="https://codepen.io">CodePen</a>.
+ </iframe>
+
+
+  <hr>
+  <br>
+
+  <h3 id="FrameThrottling">Frame Throttling</h3>
+
+    <p>
+    We can adjust the frames-per-second at which the animation is rendered using the <a href="./CanvasAnimater.html#FPS"><span class="code">FPS(fps)</span></a> method, where <span class="code">fps</span> is a number specifying the render rate.
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.FPS(50);
+    </p></pre>
+
+<p>
+    Equivalently, we can set the <a href="./CanvasAnimater.html#Canvas"><span class="code">fps</span></a> property of a <span class="code">CanvasAnimater</span> object to our specification:
+</p>
+
+    <pre><p class="source code">
+canvasAnimater.fps = 50;
+    </p></pre>
+    
+    <p>
+         If left unspecified, the default <span class="code">fps</span> is <span class="code">50</span> frames-per-second. However, note that the true rendered rate is ultimately dependent on, and limited to, client-side display and compute subject to the complexities of what we draw. Below we render the same animation as above, but at a slower rate of <span class="code">24</span> fps to observe its effect.
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.1" src="https://codepen.io/smtsjhr/embed/preview/RwxmrWg/eb6a8b3f12dc53b0497d98116a769096?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/RwxmrWg/eb6a8b3f12dc53b0497d98116a769096">
+        CanvasAnimater.js_Guide_2.1</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+      <hr>
+      <br>
+    
+      <h3 id="Evolving">Evolving</h3>
+
+      <p>
+          Having seen how to implement animation with a more traditional approach, lets now learn the functionality built into <span class="code">CanvasAnimater</span> for parameterized time evolution.
+      </p>
+
+      <p>
+          Previously, to control the animation we had to declare our own <span class="code">time</span> and <span class="code">rate</span> variables to use in our <a href="./CanvasAnimater.html#Canvas"><span class="code">draw</span></a> function, which we defined to be parameterless. With <span class="code">CanvasAnimater</span>, we could instead define the <span class="code">draw</span> function to include a single locally-scoped parameter to represent time. By doing so, <span class="code">CanvasAnimater</span> will automatically evolve the time variable and offer additional control of the rendered animation.
+      </p>
+
+      <p>
+          Below, we redefine our <span class="code">draw</span> in terms of an arbitrarily named parameter <span class="code">t</span>. Note that we do not declare and set any initial values to the <span class="code">time</span> and <span class="code">rate</span> variables like before.
+      </p>
+
+
+<pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H); 
+    
+    // define a radius for the circular path the disk follows
+    let R = Math.min(W,H)/4;
+    
+    // draw a white disk that moves in a circle  
+    ctx.beginPath();
+    ctx.arc(W/2 + R*Math.sin(t), H/2 - R*Math.cos(t), R/4, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+}
+    </p></pre>
+
+    <p>
+        This set up is enough to recreate our animation exactly as it was before with a <span class="code">FPS</span> of 50. In this case, <span class="code">CanvasAnimater</span> is using some default animation settings which we'll show how to change in the following sections.
+    </p>
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.3" src="https://codepen.io/smtsjhr/embed/preview/jOYjBWK/91991259c56d68a21ef156b3d5a55144?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/jOYjBWK/91991259c56d68a21ef156b3d5a55144">
+        CanvasAnimater.js_Guide_2.3</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    <p>
+        When our <a href="./CanvasAnimater.html#Canvas"><span class="code">draw</span></a> function is defined with a time parameter, we can use <a href="./CanvasAnimater.html#evolve"><span class="code">evolve(t_start, t_end)</span></a> to easily set a time evolution range of the animation:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.evolve(t_start, t_end);
+    </p></pre>
+        
+    <p>
+        Then for each sequential frame of the animation, <span class="code">CanvasAnimater</span> will automatically increment the time variable in the set range and pass it to <span class="code">draw</span>. Both <a href="./CanvasAnimater.html#Animation"><span class="code">t_start</span></a> and <a href="./CanvasAnimater.html#Animation"><span class="code">t_end</span></a> are optional parameters for the <a href="./CanvasAnimater.html#evolve"><span class="code">evolve()</span></a> method. Their default values are <span class="code">t_start = 0</span> and <span class="code">t_end = undefined</span>, in which case time is incremented indefinitely in the animation.
+    </p>
+
+    <p>
+        Here we set our evolution time range as <span class="code">t_start = 0</span> and <span class="code">t_end = Math.PI</span> using the method <span class="code">evolve(0, Math.PI)</span>. However, note that the evolution time interval can also be set using properties:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.t_start = 0;
+canvasAnimater.t_end = Math.PI;
+    </p></pre>
+
+    <p>  
+        As shown below, this animates our disk clock-wise only half way around its circular path until the time evolution reaches its end and the animation stops. Try experimenting with different time intervals to control the animation. The <span class="code">evolve(t_start, t_end)</span> method can even accept parameters such that <span class="code">t_end &#60; t_start</span>, which can be used to reverse the time evolution. 
+    </p>
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.3" src="https://codepen.io/smtsjhr/embed/preview/VwyJbJq/5af2cf8d98dbae8558654da5aab2c865?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/VwyJbJq/5af2cf8d98dbae8558654da5aab2c865">
+        CanvasAnimater.js_Guide_2.3</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+    </iframe>
+
+    <hr>
+    <br>
+
+    <h3 id="Looping">Looping</h3>
+
+    <p>
+        An animation can be looped over its evolution time range using the <a href="./CanvasAnimater.html#loop"><span class="code">loop(loop_animation)</span></a> method, which takes an optional boolean parameter <a href="./CanvasAnimater.html#Animation"><span class="code">loop_animation</span></a> that defaults to <span class="class">true</span>.
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.loop(true);
+    </p></pre>
+
+    <p>
+        Looping can also be enabled by setting the <a href="./CanvasAnimater.html#Animation"><span class="code">loop_animation</span></a> property:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.loop_animation = true;
+    </p></pre>    
+
+    <p>
+        Lets now loop our animation over its previously set evolution time range. This will make our disk move halfway around its circular path and then appear to jump back to its starting point when the animation loops. 
+    </p>
+    
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.4" src="https://codepen.io/smtsjhr/embed/preview/RwxzgPm/b82064396dde55715ff60e28e40614a6?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/RwxzgPm/b82064396dde55715ff60e28e40614a6">
+        CanvasAnimater.js_Guide_2.4</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+    </iframe>
+
+    <hr>
+    <br>
+
+    <h3 id="Modes">Modes</h3>
+
+    <p>
+        <span class="code">CanvasAnimater</span> allows us to control our animation's time evolution using various modes named: <span class="code">'rate'</span>, <span class="code">'frames'</span>, and <span class="code">'time'</span>. The animation mode can be configured using the <a href="./CanvasAnimater.html#mode"><span class="code">mode()</span></a> method, or by setting the <a href="./CanvasAnimater.html#Animation"><span class="code">animation_mode</span></a> and related properties as described below.
+    </p>
+
+    <hr>
+    <br>
+
+    <h3 id="rate">'rate'</h3>
+
+    <p>
+    We already got some familiarity with the <span class="code">'rate'</span> animation mode in our explorations above, since it is the default animation mode offered by <span class="code">CanvasAnimater</span>. Regardless, we can specify this mode by setting the <a href="./CanvasAnimater.html#Animation"><span class="code">animation_mode</span></a> property:
+    
+    <pre><p class="source code">
+canvasAnimater.animation_mode = 'rate';
+    </p></pre>  
+
+    <p>
+    The main parameter for this mode is given by the <a href="./CanvasAnimater.html#Animation"><span class="code">animation_rate</span></a> property, which specifies how much the evolution time variable is incremented each frame. The default value for <span class="code">animation_rate</span> is <span class="code">0.01</span>, but can be set to any value:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.animation_rate = 0.03;
+    </p></pre>
+
+    <p>
+        Alternatively to animate in <span class="code">'rate'</span> mode, we can set both the <span class="code">animation_mode</span> and <span class="code">animation_rate</span> using the <a href="./CanvasAnimater.html#mode"><span class="code">mode()</span></a> method as
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.mode('rate', animation_rate);
+    </p></pre>
+
+    <p>
+        Here,  again <span class="code">animation_rate</span> is an optional parameter defaulting to <span class="code">0.01</span>, but set to <span class="code">0.05</span> in the sketch below making the disk move faster along its path.
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.5" src="https://codepen.io/smtsjhr/embed/preview/mdpZqxJ/66e70ae35891abe869109bbf0e88318f?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/mdpZqxJ/66e70ae35891abe869109bbf0e88318f">
+        CanvasAnimater.js_Guide_2.5</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+      <hr>
+      <br>
+
+
+    <h3 id="frames">'frames'</h3>
+
+    <p>
+        In the <span class="code">'frames'</span> animation mode our animation is rendered in a set number of frames independent of the frame rate. We can specify this mode and desired frame number by setting the <a href="./CanvasAnimater.html#Animation"><span class="code">animation_mode</span></a> and <a href="./CanvasAnimater.html#Animation"><span class="code">animation_frames</span></a> properties:
+        
+        <pre><p class="source code">
+canvasAnimater.animation_mode = 'frames';
+canvasAnimater.animation_frames = 12;
+        </p></pre>  
+   
+        <p>
+            Likewise, we can set up <span class="code">'frames'</span> mode using the <a href="./CanvasAnimater.html#mode"><span class="code">mode()</span></a> method instead with some optional parameters: 
+
+        </p>
+    
+        <pre><p class="source code">
+canvasAnimater.mode('frames', animation_frames, animation_rate);
+        </p></pre>
+    
+        <p>
+            The additional parameter <a href="./CanvasAnimater.html#Animation"><span class="code">animation_rate</span></a> is optional and not relevant when the evolution time range is bounded with a defined <a href="./CanvasAnimater.html#Animation"><span class="code">t_end</span></a>. This is illustrated in the following example, where we evolve our time parameter from <span class="code">t_start = 0</span> to <span class="code">t_end = 2*Math.PI</span> so that the disk completes one full circular lap in just a total of <span class="code">12</span> frames. To make this more obvious, we set our render rate to only  <span class="code">1</span> frame-per-second.
+        </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.6" src="https://codepen.io/smtsjhr/embed/preview/jOYjapG/716f047e0fdd6fcb60f24588ce8e1038?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/jOYjapG/716f047e0fdd6fcb60f24588ce8e1038">
+        CanvasAnimater.js_Guide_2.6</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    <p>
+        If our evolution time range is left unbounded while using the <span class="code">'frames'</span> animation mode, then time evolves according to <span class="code">animation_rate</span>. However, the animation will still render a finite number of frames specified by  <span class="code">animation_frames</span>.
+    </p>
+
+    <p>
+        For example, lets again render <span class="code">12</span> frames at <span class="code">1</span> frame-per-second, but now an <span class="code">animation_rate</span> of <span class="code">Math.PI/2</span>:
+    
+    <pre><p class="source code">
+canvasAnimater.mode('frames', 12, Math.PI/2);
+    </p></pre>
+
+    <p>
+        This jumps the disks a quarter turn along its path each frame for a total of <span class="code">12</span>. frames.
+    </p>
+
+
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.7" src="https://codepen.io/smtsjhr/embed/preview/NWXZXry/4effb3208aa2dcd729a2d10ef74a3e05?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+    See the Pen <a href="https://codepen.io/smtsjhr/pen/NWXZXry/4effb3208aa2dcd729a2d10ef74a3e05">
+    CanvasAnimater.js_Guide_2.7</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+    on <a href="https://codepen.io">CodePen</a>.
+    </iframe>
+
+    <hr>
+    <br>
+
+
+    <h3 id="time">'time'</h3>
+
+    <p>
+   By using the <span class="code">'time'</span> animation mode,  we can make our animation run for a specific absolute time. This time is expressed is seconds and given by the <a href="./CanvasAnimater.html#Animation"><span class="code">animation_time</span></a> property. Similar to the other modes, this can be set using the <a href="./CanvasAnimater.html#Animation"><span class="code">animation_mode</span></a> property:
+    </p>
+        
+    <pre><p class="source code">
+canvasAnimater.animation_mode = 'time';
+canvasAnimater.animation_time = 60;
+    </p></pre>  
+
+    <p>
+        The <a href="./CanvasAnimater.html#mode"><span class="code">mode()</span></a> method can also be used to set up <span class="code">'time'</span> by calling
+
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.mode('time', animation_time, animation_rate);
+    </p></pre>
+
+    <p>
+    Again, <span class="code">animation_rate</span> is optional and only used when an evolution time range is not specified. On the other hand, when a finite evolution time range is set, the animation will take <span class="code">animation_time</span> seconds to evolve through its range. This is can be useful if we desire our animation to be a certain fixed time, but also want render at different frames-per-second.
+    </p>
+
+    <p>
+    For example below, while rendering at <span class="code">50</span> frames-per-second, we make the disk take <span class="code">60</span> seconds to move once around in a circle like the second-hand of a clock:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.mode('time', 60);
+    </p></pre>
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.8" src="https://codepen.io/smtsjhr/embed/preview/PoErvEX/99090c6a82a4db3c473d77fa1811e4f1?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/PoErvEX/99090c6a82a4db3c473d77fa1811e4f1">
+        CanvasAnimater.js_Guide_2.8</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+      <p>
+          If we do not set an end to the evolution time, then <span class="code">animation_rate</span> may be specified to control the evolution, but the total rendered time of the animation will be constrained to <span class="code">animation_time</span>. Below we demonstrate this using:
+      </p>
+
+    <pre><p class="source code">
+canvasAnimater.mode('time', 10, 0.03);
+    </p></pre>
+
+    <p>
+        This animates the disk with an <span class="code">animation_rate</span> of <span class="code">0.03</span>, for a total of <span class="code">10</span> seconds until it stops.
+    </p>
+
+
+    
+      <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_2.9" src="https://codepen.io/smtsjhr/embed/preview/KKZjLep/85e954808a584579fd966707530a5b2f?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/KKZjLep/85e954808a584579fd966707530a5b2f">
+        CanvasAnimater.js_Guide_2.9</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    <hr>
+    <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h2 id="Interacting"> Interacting </h2>
+
+    <p>
+        With <span class="code">CanvasAnimater</span> we can easily add real-time user interaction to our canvas animations. In this section we will demonstrate how to use the different interaction modes available, and describe various properties that provide user interaction data. Consult the API reference for all relevant <a href="./CanvasAnimater.html#Interaction">settings</a> and methods, like <a href="./CanvasAnimater.html#interact"><span class="code">interact()</span></a>, <a href="./CanvasAnimater.html#interactionOrigin"><span class="code">interactionOrigin()</span></a>, and <a href="./CanvasAnimater.html#scrollSize"><span class="code">scrollSize()</span></a>.
+    </p>
+
+    <p>
+        To initialize any of the interaction modes we can use the <a href="./CanvasAnimater.html#interact"><span class="code">interact()</span></a> method:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.interact(interaction_modes, interaction_enabled);
+    </p></pre>
+
+    <p>
+        Here the latter parameter, <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction_enabled</span></a>, is an optional boolean used to enable/disable interaction if true/false. <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction_modes</span></a> is a string, or list of strings, of available interaction modes that specify which modes we want to use.
+    </p>
+
+    <p>
+        The available interaction modes are <a href="#mousedownmove"><span class="code">'mousedownmove'</span></a>, <a href="#mousehovermove"><span class="code">'mousehovermove'</span></a>, <a href="#touchmove"><span class="code">'touchmove'</span></a>, and <a href="#scroll"><span class="code">'scroll'</span></a>, described in further detail below. Note that both <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction_modes</span></a>  and <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction_enabled</span></a> are also properties of <span class="code">CanvasAnimater</span> that can alternatively be used to configure interaction settings, for example:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.interaction_modes = ['mousedownmove', 'touchmove'];
+canvasAnimater.interaction_enabled = true;
+    </p></pre>
+
+    <p>Depending on which interaction modes we choose, <span class="code">CanvasAnimater</span> provides various <a href="./CanvasAnimater.html#Interaction">interaction properties</a> corresponding to user input data. These properties can be used directly within our <a href="./CanvasAnimater.html#Animation"><span class="code">draw</span></a> function's code to control the animation, or in the user defined <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction</span></a> function. In principle, the same interactivity effects can be accomplished using either approach, but in practice one may be preferred. The main difference is that <a href="./CanvasAnimater.html#Animation"><span class="code">draw</span></a> is called for every rendered frame, whereas <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction</span></a> is only called when any of the initialized event handlers are active. We will demonstrate these different approaches in the following sections.
+    </p>
+
+    <hr>
+    <br>
+
+
+
+
+
+
+
+
+
+
+
+
+    <h3 id="mousedownmove">'mousedownmove'</h3>
+
+    <strong>
+        <a href="./CanvasAnimater.html#Interaction">Interaction Properties:</a>     
+        <pre><p class="source code" >mouseX, mouseY, mouseX1, mouseY1, pressedMouse, pressed</p></pre>
+    </strong>
+
+    <p>
+        This section will describe how to use the <span class="code">'mousedownmove'</span> interaction mode. We will invest some detail going over all relevant interaction properties and settings since their usage translates to other available interaction modes.
+    </p>
+
+    <p>
+    The interaction mode <span class="code">'mousedownmove'</span> enables interactivity whenever the mouse is pressed down and moved on the canvas. We can enable this mode by simply calling:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.interact('mousedownmove');
+    </p></pre>
+
+    <p>
+        When this mode is enabled we can use the interaction properties listed above as <span class="code">CanvasAnimater</span> properties in our sketch. 
+
+        Lets start by demonstrating basic usage of the properties <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY</span></a>,  which provide values of the mouse's horizontal and vertical pixel coordinates, respectively. To illustrate this below, we map the <span class="code">mouseX</span> and <span class="code">mouseY</span> properties to the position of a white disk.
+    </p>
+
+    <p>
+        Let's show how to accomplish this in two ways: with and without using the <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction</span></a> function. First, we declare global variables <span class="code">x_pos</span> and <span class="code">y_pos</span> to represent our disk's position to be used in our <a href="./CanvasAnimater.html#Animation"><span class="code">draw</span></a> function:
+    </p>
+
+    <pre><p class="source code">
+let x_pos = 0;
+let y_pos = 0;
+
+canvasAnimater.draw = function (t) {
+
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H); 
+    
+    // draw a white disk at position (x_pos, y_pos)
+    ctx.beginPath();
+    ctx.arc(x_pos, y_pos , 10, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+}
+    </p></pre>
+
+    <p>
+    Next, using the <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction</span></a> property, we define and set a function to update the disk's position with our interaction data given by <span class="code">mouseX</span> and <span class="code">mouseY</span>:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.interaction = function () {
+    x_pos = canvasAnimater.mouseX;
+    y_pos = canvasAnimater.mouseY;
+}
+    </p></pre>
+
+    <p>
+        This moves the disk to wherever the user's mouse is pressed down. By moving the mouse over the canvas whenever its pressed , we can effectively drag the disk around. Note that when the sketch is initialized before any user interaction the disk is positioned in the top-left corner of the canvas, which corresponds to the default origin in pixel coordinates.
+    </p>
+
+    <p> 
+        For reference in the interactive sketches below, we display text on the canvas for the interaction variables in use. This is implemented within our <span class="code">draw</span> function, but can be effectively ignored for our purposes in this guide.
+    </p>
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.0" src="https://codepen.io/smtsjhr/embed/preview/eYVmvZR/60eb31ca4a1ec2028b4dd6161349090a?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/eYVmvZR/60eb31ca4a1ec2028b4dd6161349090a">
+        CanvasAnimater.js_Guide_3.0.0</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    
+    <p>
+        Before moving on, lets recreate the same sketch without using the <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction</span></a> property as a standalone function. This approach can be more minimal and may not require declaring global variables. Having specified interaction modes, we can simply refer to available interaction properties directly within our <a href="./CanvasAnimater.html#Animation"><span class="code">draw</span></a> function, and only declare locally scoped variables if needed as follows:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    // get interaction variables for mouse position
+    let x_pos = canvasAnimater.mouseX; 
+    let y_pos = canvasAnimater.mouseY; 
+    
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H);  
+    
+    // draw a white disk at mouse position
+    ctx.beginPath();
+    ctx.arc(x_pos, y_pos , 10, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+}  
+    </p></pre>
+
+    <p>
+    The sketch below achieves the same interactivity in moving the disk around with the mouse. For the rest of this guide, we will use either approach as it suits our needs.  
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.0.1" src="https://codepen.io/smtsjhr/embed/preview/PoQYWWv/b6c8bce1eb40c71da19898b621591eb7?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/PoQYWWv/b6c8bce1eb40c71da19898b621591eb7">
+        CanvasAnimater.js_Guide_3.0.0.1</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+      <p>
+         When the <span class="code">'mousedownmove'</span> mode is enabled, <span class="code">CanvasAnimater</span> exposes the boolean interaction property <a href="./CanvasAnimater.html#Interaction"><span class="code">pressedMouse</span></a>, which is <span class="code">true</span> whenever the mouse is pressed down and <span class="code">false</span> otherwise. For this mode, the more general property <a href="./CanvasAnimater.html#Interaction"><span class="code">pressed</span></a> behaves similarly, which also responds when the <span class="code">'touchmove'</span> interaction mode is enabled as discussed further below.
+      </p>
+
+      <p>
+          The following sketch uses <a href="./CanvasAnimater.html#Interaction"><span class="code">pressedMouse</span></a> to change the disk's color to red whenever the mouse is pressed. Here we utilize this property directly in our <span class="code">draw</span> function:
+      </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    // get interaction variables for mouse position
+    let x_pos = canvasAnimater.mouseX; 
+    let y_pos = canvasAnimater.mouseY; 
+    
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H);  
+    
+    // draw a white disk at mouse position
+    ctx.beginPath();
+    ctx.arc(x_pos, y_pos , 10, 0, 2*Math.PI);
+    ctx.closePath();
+    
+    // make disk red if mouse is pressed and white otherwise
+    if (canvasAnimater.pressedMouse) {
+        ctx.fillStyle = 'red';
+    }
+    else {
+        ctx.fillStyle = 'white';
+    }
+    ctx.fill();
+    
+}  
+    </p></pre>
+
+
+      <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.0.2" src="https://codepen.io/smtsjhr/embed/preview/KKQwmKZ/823ced10f67ae04bdae61be2420669bb?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/KKQwmKZ/823ced10f67ae04bdae61be2420669bb">
+        CanvasAnimater.js_Guide_3.0.0.2</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+
+
+    <p>
+        The interaction properties <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX1</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY1</span></a> behave like their counterparts <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY</span></a>, but give the mouse's positional coordinates scaled to unit range. For example, suppose our canvas has a size of 500x300 pixels. Then <span class="code">mouseX</span> and <span class="code">mouseY</span> numerically range from 0 to 500 and 0 to 300, respectively. However, <span class="code">mouseX1</span> and <span class="code">mouseY1</span> will both  range from 0 to 1. 
+     </p>
+
+     <p> 
+        In the following sketch, we draw a gray box at the top-left corner of the canvas. We then use <span class="code">mouseX1</span> and <span class="code">mouseY1</span> to bound the disk's position to remain inside the gray box. Observe that the disk reaches the edges of the box precisely when the mouse reaches the edge of the canvas.
+     </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    // get interaction variables for normalized mouse position
+    let x_pos = canvasAnimater.mouseX1; 
+    let y_pos = canvasAnimater.mouseY1; 
+    
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H);  
+    
+    // declare a side length of the box
+    let B = 0.75*Math.min(W,H);
+    
+    // draw a gray box in the top-left corner
+    ctx.fillStyle = 'gray';
+    ctx.fillRect(0, 0, B, B);  
+    
+    // draw a white disk at mouse position bounded to the box
+    ctx.beginPath();
+    ctx.arc(B*x_pos, B*y_pos , 10, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+}  
+    </p></pre>
+
+
+     <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.0.4" src="https://codepen.io/smtsjhr/embed/preview/wvyBPXO/4b1a585f241f57b4b14a3593a807faf5?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/wvyBPXO/4b1a585f241f57b4b14a3593a807faf5">
+        CanvasAnimater.js_Guide_3.0.0.4</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+
+     <p>
+         When working with spatial coordinates on the canvas we usually consider the top-left corner pixel of the canvas as the origin of our coordinate axis, and reference other locations relative to this point. This convention is used by default for the mouse position properties <span class="code">mouseX</span>, <span class="code">mouseY</span>, <span class="code">mouseX1</span>, and <span class="code">mouseY1</span>.
+    </p>
+
+    <p> 
+        We can change the relative location of this origin point using the <a href="./CanvasAnimater.html#interactionOrigin"><span class="code">interactionOrigin(x0, y0)</span></a> method, where the input parameters <span class="code">(x0, y0)</span> represent the origin point in a scale-invariant manner. Both <span class="code">x0</span> and <span class="code">y0</span> are numbers ranging from 0 to 1 that specify a relative origin point on the canvas. The point <span class="code">(0, 0)</span> corresponding to the top-left corner of the canvas, and is the default interaction origin as mentioned. To get our bearings, the other corners are given by: <span class="code">(1, 0)</span> the top-right, <span class="code">(1, 1)</span> the bottom-right, and <span class="code">(0, 1)</span> the bottom-left. In this way, the point <span class="code">(0.5, 0.5)</span> corresponds to the center of the canvas:
+     </p>
+
+    <pre><p class="source code">
+canvasAnimater.interactionOrigin(0.5,0.5);
+    </p></pre>
+
+    <p> Note that we can also set the interaction origin using the <a href="./CanvasAnimater.html#Interaction"><span class="code">interaction_origin<span></a> property, where we specify the point as an array of two numbers: </p>
+
+    <pre><p class="source code">
+canvasAnimater.interaction_origin = [0.5,0.5];
+    </p></pre>
+
+    <p>
+        When the interaction origin is at its default point <span class="code">(0,0)</span> corresponding to the top-left corner of the canvas, our mouse interaction data is effectively limited to a single positive quadrant. Consequently, their numerical values are all positive. However, when we set a interaction origin to something other than <span class="code">(0,0)</span>, the interaction data spans all four quadrants allowing negative values. We will demonstrate this in the following sketch.
+    </p>
+
+     <p>
+         Below we redo our previous sketch with the disk bounded to the gray box, but now center the box and interaction origin by setting it to <span class="code">(0.5, 0.5)</span>. Then  we use the unit scaled interaction data <span class="code">mouseX1</span> and <span class="code">mouseY1</span> like before to bound the disk's position. 
+     </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    // get interaction variables for normalized mouse position
+    let x_pos = canvasAnimater.mouseX1; 
+    let y_pos = canvasAnimater.mouseY1; 
+    
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H);  
+    
+    // declare a side length of the box
+    let B = 0.75*Math.min(W,H);
+    
+    // draw a gray box centered in the canvas
+    ctx.fillStyle = 'gray';
+    ctx.fillRect(W/2 - B/2 , H/2 - B/2, B, B);  
+    
+    // draw a white disk at mouse position bounded to the box
+    ctx.beginPath();
+    ctx.arc(W/2 + B/2*x_pos, H/2 + B/2*y_pos , 10, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+}
+    </p></pre>
+
+    <p>
+        In the sketch below, we display both pairs of mouse interaction data for reference. Observe how their values can now be negative, and how the unit scaled variables are now bound within the range <span class="code">-1</span> and <span class="code">1</span>.
+    </p>
+
+     <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.0.5" src="https://codepen.io/smtsjhr/embed/preview/MWQYOxe/af74f7e85320c0962674b4437302e318?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/MWQYOxe/af74f7e85320c0962674b4437302e318">
+        CanvasAnimater.js_Guide_3.0.0.5</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+
+
+
+      <hr>
+      <br>
+
+
+
+
+
+
+
+
+
+
+
+    <h3 id="mousehovermove">'mousehovermove'</h3>
+
+
+    <strong>
+    <a href="./CanvasAnimater.html#Interaction">Interaction Properties:</a>     
+    <pre><p class="source code" >mouseX, mouseY, mouseX1, mouseY1</p></pre>
+    </strong>
+   
+
+    <p>
+        The interaction mode <span class="code">'mousehovermove'</span> enables interactivity whenever the mouse is hovered over the canvas. This mode is similar to the <a href=#mousedownmove><span class="code">'mousedownmove'</span></a> mode, but the mouse no longer needs to be pressed down to expose the interaction variables <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX</span></a>, <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY</span></a>, <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX1</span></a>, and <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY1</span></a>. However, unlike the <span class="code">'mousedownmove'</span> mode, the boolean properties <a href="./CanvasAnimater.html#Interaction"><span class="code">pressedMouse</span></a> or <a href="./CanvasAnimater.html#Interaction"><span class="code">pressed</span></a> no longer respond to the <span class="code">'moushovermove'</span> mode.   
+    </p>
+
+    <p>
+        We can enable the <span class="code">'mousehovermove'</span> interaction mode using the <a href="./CanvasAnimater.html#interact"><span class="code">interact()</span></a> method:  
+    </p>
+    
+        <pre><p class="source code">
+canvasAnimater.interact('mousedownmove');
+        </p></pre>
+     
+    <p>
+        Below we demonstrate the same sketch we explored that moves a disk, but now using <span class="code">'mousehovermove'</span> instead. Consult the <a href=#mousedownmove><span class="code">'mousedownmove'</span> section </a> for details on using properties <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX1</span></a>, and <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY1</span></a> and the <a href="./CanvasAnimater.html#interactionOrigin"><span class="code">interactionOrigin()</span></a> method.
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.1" src="https://codepen.io/smtsjhr/embed/preview/JjpjwBx/195427c9c3b9c8af34bd76e5518c3cb2?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/JjpjwBx/195427c9c3b9c8af34bd76e5518c3cb2">
+        CanvasAnimater.js_Guide_3.0.1</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    
+
+<hr>
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h3 id="touchmove">'touchmove'</h3>
+
+    <strong>
+        <a href="./CanvasAnimater.html#Interaction">Interaction Properties:</a>     
+        <pre><p class="source code" >mouseX, mouseY, mouseX1, mouseY1, pressedTouch, pressed</p></pre>
+    </strong>
+
+    <p>
+        The interaction mode <span class="code">'touchmove'</span> is specifically used for enabling interactivity for touch screen interfaces. This mode is similar to the <span class="code">'mousedownmove'</span> and <span class="code">'mousehovermove'</span> modes.  However, our previous sketches showcasing the mouse interaction functionally using those modes did not respond to any touch interaction. For a consistent user experience, we can enable <span class="code">'touchmove'</span> together with a mouse-based mode. Note that if we want to specify multiple modes using <a href="./CanvasAnimater.html#interact"><span class="code">interact()</span></a>, then the input parameter must be given as an array of interaction mode strings:
+    </p>
+
+
+        <pre><p class="source code">
+canvasAnimater.interact(['mousedownmove', 'touchmove']);
+        </p></pre>
+    
+        <p> 
+            The <span class="code">'touchmove'</span> mode also shares the same mouse position interaction variables like <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX</span></a>, <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY</span></a>, <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX1</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseY1</span></a>. In addition, whenever touch is engaged the boolean properties <a href="./CanvasAnimater.html#Interaction"><span class="code">pressedTouch</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">pressed</span></a> are exposed. The latter is <span class="code">true</span> when either <a href="./CanvasAnimater.html#Interaction"><span class="code">pressedTouch</span></a> or <a href="./CanvasAnimater.html#Interaction"><span class="code">pressedMouse</span></a> are <span class="code">true</span>. Consult the <a href=#mousedownmove><span class="code">'mousedownmove'</span> section </a> for related details on using these properties and the <a href="./CanvasAnimater.html#interactionOrigin"><span class="code">interactionOrigin()</span></a> method.
+         
+        </p>
+     
+    <p>
+         In the sketch below, we utilize both the <span class="code">'touchmove'</span> and <span class="code">'mousedownmove'</span> interaction modes to move the disk with either mouse or touch interactivity. 
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.2" src="https://codepen.io/smtsjhr/embed/preview/rNJNPMR/fa134d3144fca3c954779ab7670a3cdc?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/rNJNPMR/fa134d3144fca3c954779ab7670a3cdc">
+        CanvasAnimater.js_Guide_3.0.2</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    
+    <hr>
+    <br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h3 id="scroll">'scroll'</h3>
+
+    <strong>
+        <a href="./CanvasAnimater.html#Interaction">Interaction Properties:</a>     
+        <pre><p class="source code" >scrollX, scrollY, scrollX1, scrollY1</p></pre>
+    </strong>
+
+
+
+    <p>
+        The <span class="code">'scroll'</span> interaction mode exposes scroll bar parameters for use in our sketch. When the <span class="code">'scroll'</span> mode is enabled the canvas is automatically wrapped and fixed in its containing window. Although the actual canvas position in the window is not altered when scrolling, this creates a virtual scroll simulating a swiping effect. 
+    </p>
+
+    <p>
+        We can initialize the <span class="code">'scroll'</span> interaction mode with the <a href="./CanvasAnimater.html#interact"><span class="code">interact()</span></a> method:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.interact('scroll');
+    </p></pre>
+
+    <p> 
+        Once initialized, the interaction properties <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollX</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollY</span></a> give us the horizontal and vertical components of the windows scroll position in pixels. By default, <span class="code">CanvasAnimater</span> sets the available scroll size to 2000 pixels in both the horizontal and vertical directions. We can specify our own scroll size using the <a href="./CanvasAnimater.html#scrollSize"><span class="code">scrollSize(scroll_width, scroll_height)</span></a> method:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.scrollSize(2000, 2000);
+    </p></pre>
+
+    <p>
+        Alternatively, we can use th <span class="code">CanvasAnimater</span> properties <a href="./CanvasAnimater.html#Interaction"><span class="code">scroll_width</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">scroll_height</span></a> to set the scroll size. For example, to utilize only a vertical scroll we set the width to 0 pixels:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.scroll_width = 0;
+canvasAnimater.scroll_height = 2000;
+    </p></pre>
+
+    <p>
+        In the sketch below, we map the interaction properties <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollX</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollY</span></a> to the position of the white disk allowing us to control it through scrolling commands. Note that we bound the values of these mapped positional coordinates to ensure the disk stays within the canvas.
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // get interaction variables for scroll position and bound their range
+    let x_pos = Math.min(W,canvasAnimater.scrollX); 
+    let y_pos = Math.min(H, canvasAnimater.scrollY); 
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H);  
+    
+    // draw a white disk at scroll position
+    ctx.beginPath();
+    ctx.arc(x_pos, y_pos , 10, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+}
+    </p></pre>
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_3.0.3" src="https://codepen.io/smtsjhr/embed/preview/GRQReod/b6609195979f6726d1de09df072bed24?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/GRQReod/b6609195979f6726d1de09df072bed24">
+        CanvasAnimater.js_Guide_3.0.3</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+    </iframe>
+
+    <p>
+        The interaction properties <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollX1</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollY1</span></a> behave like their counterparts <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollX</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollY</span></a>, but have their values scaled to unit range between 0 and 1. These are analogous to the unit-scaled properties <a href="./CanvasAnimater.html#Interaction"><span class="code">mouseX1</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollY1</span></a> we explored for the other interaction modes.
+    </p>
+
+    <p>
+        Here we recreate our previous sketch, this time using <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollX1</span></a> and <a href="./CanvasAnimater.html#Interaction"><span class="code">scrollY1</span></a> to bound the disks position on the canvas.
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+  
+    // get interaction variables for scroll position
+    let x_pos = canvasAnimater.scrollX1; 
+    let y_pos = canvasAnimater.scrollY1; 
+    
+    // draw a black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, W, H);  
+  
+    // draw a white disk at scroll position
+    ctx.beginPath();
+    ctx.arc(W*x_pos, H*y_pos , 10, 0, 2*Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+}
+    </p></pre>
+
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="Untitled" src="https://codepen.io/smtsjhr/embed/preview/ZErQZRb/1065fac8b5410e595b1ab386f3203521?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/ZErQZRb/1065fac8b5410e595b1ab386f3203521">
+        Untitled</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+    </iframe>
+      
+    <hr>
+    <br>
+
+
+
+
+
+
+
+    <h2 id="DwitterMode"> Dwitter Mode </h2>
+
+    <p>
+        <span class="code">CanvasAnimater</span> offers special functionality for implementing sketches coded on <a href="https://www.dwitter.net/">Dwittter.net</a>, a popular "code golf" platform. One of the main objectives on Dwitter is to use very little code, typically under 140 bytes. To this end, users are provided with a few common functions named with just a single character to utilize in their sketch. These function definitions are:
+    </p>
+
+    <pre><p class="source code">
+t: Elapsed time.
+S: Shorthand for Math.sin.
+C: Shorthand for Math.cos.
+T: Shorthand for Math.tan.
+R: Function that generates rgba-strings; usage: R(255, 255, 255, 0.5)
+c: The canvas.
+x: The 2D context for that canvas.
+    </p></pre>
+ 
+    <p>
+        By calling the <a href="./CanvasAnimater.html#dwitterMode"><span class="code">dwitterMode()</span></a> method, <span class="code">CanvasAnimater</span> automatically creates a namespace to interpret code using these short function definitions from Dwitter. We are then free to use them anywhere in our <span class="code">draw</span> function. For example, here we recreate the same sketch we explored in the <a href=#Evolving><span class="code">Evolving section</span></a> of a disk moving around in a circular path. Note that we can still conveniently use <span class="code">CanvasAnimater</span> properties as well.
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.draw = function (t) {
+
+    let W = canvasAnimater.width;
+    let H = canvasAnimater.height;
+    
+    // draw a black background
+    x.fillStyle = R(0, 0, 0, 1);
+    x.fillRect(0, 0, W, H); 
+    
+    // define a radius for the circular path the disk follows
+    let D = Math.min(W,H)/4;
+    
+    // draw a white disk that moves in a circle  
+    x.beginPath();
+    x.arc(W/2 + D*S(t), H/2 - D*C(t), D/4, 0, 2*Math.PI);
+    x.closePath();
+    x.fillStyle = R(255, 255, 255, 1);
+    x.fill();
+    
+}
+    </p></pre>
+
+    <p>
+        In our sketch below, we enable Dwitter mode by simply calling <a href="./CanvasAnimater.html#dwitterMode"><span class="code">dwitterMode()</span></a> without specifying any of its optional parameters for now.
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_5.0" src="https://codepen.io/smtsjhr/embed/preview/ZErOpad/56c1172f74406be86f87f9e3dadf70d7?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/ZErOpad/56c1172f74406be86f87f9e3dadf70d7">
+        CanvasAnimater.js_Guide_5.0</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+    </iframe>
+
+
+    <p>
+        By convention, sketches on Dwitter are drawn onto a fixed canvas of size 1920x1080 pixels. Therefore, in order to suit this aspect ratio, it is common for users to hard code numerical values directly into their sketch that determine the desired geometry. When we implement a Dwitter sketch with <span class="code">CanvasAnimater</span> we can choose to preserve the native Dwitter canvas size, or rescale the sketch to user specified dimensions. This is achieved using optional boolean parameters supplied to the <a href="./CanvasAnimater.html#dwitterMode"><span class="code">dwitterMode()</span></a> method:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.dwitterMode(dwitter_mode, dwitter_scale, dwitter_res); 
+    </p></pre>
+
+    <p>
+        Here, <a href="./CanvasAnimater.html#Dwitter"><span class="code">dwitter_mode</span></a> defaults to <span class="code">true</span> and simply enables/disables Dwitter mode. The remaining two parameters both default to <span class="code">false</span>, but when <span class="code">true</span> yield a rendering more faithful to Dwitter's. When <a href="./CanvasAnimater.html#Dwitter"><span class="code">dwitter_res</span></a> is <span class="code">true</span> the canvas size is set to 1920x1080 pixels, overriding any other <a href=#Sizing>canvas sizing</a> commands set by <span class="code">CanvasAnimater</span>. When <a href="./CanvasAnimater.html#Dwitter"><span class="code">dwitter_scale</span></a> is true, the canvas is rescaled to user specified dimensions by automatically <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/scale">transforming the canvas context</a>. 
+    </p>
+
+    <p> 
+        To explore these settings, lets borrow the code for the default sample sketch on Dwitter:
+
+    </p>
+
+    <pre><p class="source code">
+'for(i=0;i&lt;9;i++)x.fillRect(400+i*100+S(t)*300,400,50,200)'
+    </p></pre>
+
+    <p>
+        As done previously, we can just use this code verbatim within our <span class="code">draw</span> function, but instead here we will introduce and set the <span class="code">CanvasAnimater</span> property <a href="./CanvasAnimater.html#Dwitter"><span class="code">dwitter_code</span></a> to our code string as follows;
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.dwitterCode = 'for(i=0;i&lt;9;i++)x.fillRect(400+i*100+S(t)*300,400,50,200)';
+    </p></pre>
+
+    <p>
+        This approach offers a more stripped down template to conveniently import a Dwitter sketch. Now by calling <a href="./CanvasAnimater.html#Dwitter"><span class="code">dwitter_mode</span></a> with all optional parameters set to true, our canvas dimensions and sketch geometry scale accordingly. This is demonstrated in the following sketch, where we use the <a href="./CanvasAnimater.html#flex">flex()</a> method to make the canvas fill an arbitrarily sized window. 
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_5.1" src="https://codepen.io/smtsjhr/embed/preview/XWZdqyd/9487e6f20887768e50f8d533bfb1ea7f?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/XWZdqyd/9487e6f20887768e50f8d533bfb1ea7f">
+        CanvasAnimater.js_Guide_5.1</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+      </iframe>
+
+    <hr>
+    <br>
+
+
+
+
+
+
+
+
+    <h2 id="Recording"> Recording </h2>
+
+    <p>
+        Recording our animation is easily accomplished with <span class="code">CanvasAnimater</span>. This outputs individual frames for download that can be recompiled into various media formats. Once we have our sketch set up, we can record the animation with all the same settings to ensure a faithful rendering. This is done by calling the <a href="./CanvasAnimater.html#record"><span class="code">record()</span></a> method with some optional parameters:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.record(record_enabled, filename, record_loops, pre_loop);
+    </p></pre>
+
+    <p>
+        Each of these input parameters are also <span class="code">CanvasAnimater</span> properties that can be alternatively used to configure <a href="./CanvasAnimater.html#Recording"><span class="code">recording settings</span></a>. 
+    </p>
+
+    <p>
+        The first parameter <a href="./CanvasAnimater.html#Recording"><span class="code">record_enabled</span></a>  is a boolean which defaults to <span class="code">true</span>. This allows us to conveniently toggle on/off recording when the animation is rendered.
+    </p>
+
+    <p> 
+        The second parameter <a href="./CanvasAnimater.html#Recording"><span class="code">filename</span></a> serves as a name prefix to give each recorded frame, where output frames are indexed as: <span class="code">'filename_0'</span>, <span class="code">'filename_1'</span>, <span class="code">'filename_2'</span>, etc. The default <a href="./CanvasAnimater.html#Recording"><span class="code">filename</span></a> string is <span class="code">'frame'</span>.
+    </p>
+
+    <P>
+        The last two parameters apply only when our animation is set to <a href=#Looping >loop</a>. In this case, <a href="./CanvasAnimater.html#Recording"><span class="code">record_loops</span></a> is the number of animation loops to be recorded, and defaults to <span class="code">1</span>. The boolean parameter <a href="./CanvasAnimater.html#Recording"><span class="code">pre_loop</span></a> defaults to <span class="code">true</span>, which allows one full animation loop to complete before recording begins. 
+    </P>
+
+    <p>
+        Unless our animation time is unbounded, the number of frames to be recorded is automatically determined according to our animation settings. However, we can set a limit to the number of recorded output frames using the <a href="./CanvasAnimater.html#recordMaxFrames"><span class="code">recordMaxFrames()</span></a> method:
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.recordMaxFrames(record_max_frames);
+    </p></pre>
+
+    <p>
+        The input parameter <a href="./CanvasAnimater.html#Recording"><span class="code">record_max_frames</span></a> is the number of maximum frames that can be recorded. It has a default value of 1000 frames, and can also be set as a <span class="code">CanvasAnimater</span> property.
+    </p>
+
+    <p>
+        The template below offers a recording setup for one of the sketches we experimented with earlier in this guide, where a white disk moves around in a circle. Here our animation is designed to loop seamlessly, but we opt to record just 1 animation loop with <span class="code">pre_loop</span> set to <span class="code">true</span>. Moreover, we give our output filename  the prefix <span class="code">'myFrame_'</span>
+        :
+    </p>
+
+    <pre><p class="source code">
+canvasAnimater.record(false, 'myFrame_', 1, true);
+    </p></pre>
+
+    <p> 
+        Note that we initialize the sketch with  <span class="code">record_enabled</span> set to <span class="code">false</span> to avoid any unwarranted downloading while viewing this guide. For this particular animation with these settings, <span class="code">CanvasAnimater</span> will output 100 recorded frames.
+    </p>
+
+    <iframe height="500" style="width: 100%;" scrolling="no" title="CanvasAnimater.js_Guide_4.0" src="https://codepen.io/smtsjhr/embed/preview/bGLpMgj/341ed162496edd43b3a22216ca6db867?default-tab=js%2Cresult&editable=true&theme-id=dark" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+        See the Pen <a href="https://codepen.io/smtsjhr/pen/bGLpMgj/341ed162496edd43b3a22216ca6db867">
+        CanvasAnimater.js_Guide_4.0</a> by Sumit Sijher (<a href="https://codepen.io/smtsjhr">@smtsjhr</a>)
+        on <a href="https://codepen.io">CodePen</a>.
+    </iframe>
+
+
+
+
+<hr>
+<br>
+
+
+
+
+
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+</div>
+
+
+<nav>
+
+    <h3>CanvasAnimater.js</h3>
+    <p> source :: <a href="https://github.com/smtsjhr">github</a> // <a href="https://smtsjhr.com">@smtsjhr</a></p>
+
+    <h2><a href="index.html#Guide">Guide </a></h2>
+
+    <h2><a href="./CanvasAnimater.html">API</a></h2>
+    
+    <a href="./CanvasAnimater.html#SettingsSection"><h3>Settings</h3></a>
+    <ul>
+        <li><a href="./CanvasAnimater.html#Canvas">Canvas</a></li>
+        <li><a href="./CanvasAnimater.html#Animation">Animation</a></li>
+        <li><a href="./CanvasAnimater.html#Interaction">Interaction</a></li>
+        <li><a href="./CanvasAnimater.html#Recording">Recording</a></li>
+        <li><a href="./CanvasAnimater.html#Dwitter">Dwitter</a></li>
+    </ul>
+    
+    <a href="./CanvasAnimater.html#MethodsSection"><h3>Methods</h3></a>
+    <ul>
+        <li><a href="./CanvasAnimater.html#animate">animate()</a></li>
+        <li><a href="./CanvasAnimater.html#center">center()</a></li>
+        <li><a href="./CanvasAnimater.html#dwitterMode">dwitterMode()</a></li>
+        <li><a href="./CanvasAnimater.html#evolve">evolve()</a></li>
+        <li><a href="./CanvasAnimater.html#flex">flex()</a></li>
+        <li><a href="./CanvasAnimater.html#FPS">FPS()</a></li>
+        <li><a href="./CanvasAnimater.html#interact">interact()</a></li>
+        <li><a href="./CanvasAnimater.html#interactionOrigin">interactionOrigin()</a></li>
+        <li><a href="./CanvasAnimater.html#loop">loop()</a></li>
+        <li><a href="./CanvasAnimater.html#mode">mode()</a></li>
+        <li><a href="./CanvasAnimater.html#printSettings">printSettings()</a></li>
+        <li><a href="./CanvasAnimater.html#record">record()</a></li>
+        <li><a href="./CanvasAnimater.html#recordMaxFrames">recordMaxFrames()</a></li>
+        <li><a href="./CanvasAnimater.html#scrollSize">scrollSize()</a></li>
+        <li><a href="./CanvasAnimater.html#setAnimater">setAnimater()</a></li>
+        <li><a href="./CanvasAnimater.html#size">size()</a></li>
+
+    </ul>
+
+
+
+</nav>
+
+
+<br class="clear">
+
+<footer>
+
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
